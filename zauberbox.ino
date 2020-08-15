@@ -54,8 +54,9 @@ void setup() {
     lcd.init();
     lcd.backlight();
     //lcd.noBacklight();
+    lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Hello Nils!");
+    lcd.print("It's Working!");
     Serial.print("  LCD [ok]\n");
 }
 
@@ -87,6 +88,15 @@ void loop() {
             Serial.print("\n");
 
             servo1.write(3*second);
+
+            lcd.setCursor(0, 1);
+            lcd.print(hour);
+            lcd.print(":");
+            lcd.print(minute);
+            lcd.print(":");
+            lcd.print(second);
+            lcd.print("   ");
+            
         }
     }
 }
