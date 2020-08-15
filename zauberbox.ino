@@ -2,6 +2,8 @@
 #include <NeoSWSerial.h>
 #include <TinyGPS.h>
 #include <Servo.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 /* Define SW UART for GPS receiver
 *
@@ -17,6 +19,13 @@ TinyGPS gps;
 
 // Define servo
 Servo servo1;
+
+/* Define LCD
+*  I2C address 0x27
+*  16 columns
+*  2 rows
+*/
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Define some variables for GPS data
 float lat, lon;
@@ -40,6 +49,14 @@ void setup() {
     servo1.attach(9);
     servo1.write(90);
     Serial.print("  Servo [ok]\n");
+
+    // Setup LCD
+    lcd.init();
+    lcd.backlight();
+    //lcd.noBacklight();
+    lcd.setCursor(0, 0);
+    lcd.print("Hello Nils!");
+    Serial.print("  LCD [ok]\n");
 }
 
 // Main loop
