@@ -58,6 +58,9 @@ void setup() {
     lcd.setCursor(0, 0);
     lcd.print("It's Working!");
     Serial.print("  LCD [ok]\n");
+
+    // Setup output pin for piezo
+    pinMode(6, OUTPUT);
 }
 
 // Main loop
@@ -97,6 +100,10 @@ void loop() {
             lcd.print(second);
             lcd.print("   ");
             
+            digitalWrite(6, HIGH);
+            delay(50);
+            digitalWrite(6, LOW);
+
         }
     }
 }
