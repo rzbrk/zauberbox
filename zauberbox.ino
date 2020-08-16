@@ -33,6 +33,18 @@ int year;
 byte month, day, hour, minute, second, hundredths;
 unsigned long fix_age;
 
+void lcd_print_time(byte hour, byte minute, byte second) {
+    lcd.setCursor(0, 0);
+    if (hour < 10) { lcd.print("0"); }
+    lcd.print(hour);
+    lcd.print(":");
+    if (minute < 10) { lcd.print("0"); }
+    lcd.print(minute);
+    lcd.print(":");
+    if (second < 10) { lcd.print("0"); }
+    lcd.print(second);
+}
+
 // Setup Routine
 void setup() {
     // Setup the serial port to computer
@@ -55,8 +67,6 @@ void setup() {
     lcd.backlight();
     //lcd.noBacklight();
     lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("It's Working!");
     Serial.print("  LCD [ok]\n");
 
     // Setup output pin for piezo
@@ -92,14 +102,8 @@ void loop() {
 
             servo1.write(3*second);
 
-            lcd.setCursor(0, 1);
-            lcd.print(hour);
-            lcd.print(":");
-            lcd.print(minute);
-            lcd.print(":");
-            lcd.print(second);
-            lcd.print("   ");
-            
+            lcd_print_time(hour, minute, second);
+
             digitalWrite(6, HIGH);
             delay(50);
             digitalWrite(6, LOW);
