@@ -1,6 +1,5 @@
-//#include <SoftwareSerial.h>
 #include <NeoSWSerial.h>
-#include <TinyGPS.h>
+#include <TinyGPS++.h>
 #include <Servo.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -13,9 +12,13 @@
 *  TX        | D4
 *
 */
-//SoftwareSerial gpsSerial(3, 4);
 NeoSWSerial gpsSerial(3, 4);
-TinyGPS gps;
+TinyGPSPlus gps;
+
+// Because gps.satellites.value() from TinyGPS++ does not work as
+// expected we extract the number of satellites in view from the GPGSV
+// sentence manually
+TinyGPSCustom nsat(gps, "GPGSV", 3);
 
 // Define servo
 Servo servo1;
@@ -30,8 +33,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 // Define some variables for GPS data
 float lat, lon;
 int year;
-byte month, day, hour, minute, second, hundredths;
-unsigned long fix_age;
+byte month, day, hour, minute, second;
 
 void lcd_print_time(byte hour, byte minute, byte second) {
     lcd.setCursor(0, 0);
@@ -57,7 +59,6 @@ void setup() {
     Serial.print("  UART to GPSr [ok]\n");
 
     // Setup the servo
-    //delay(1000);
     servo1.attach(9);
     servo1.write(90);
     Serial.print("  Servo [ok]\n");
@@ -75,10 +76,15 @@ void setup() {
 
 // Main loop
 void loop() {
-    while(gpsSerial.available()) { 
-        if(gps.encode(gpsSerial.read())) { 
-            gps.crack_datetime(&year, &month, &day, &hour, &minute,
-                &second, &hundredths, &fix_age);
+    while(gpsSerial.available() > 0) { 
+        gps.encode(gpsSerial.read());
+        if (gps.location.isUpdated()) {
+            year = gps.date.year();
+            month = gps.date.month();
+            day = gps.date.day();
+            hour = gps.time.hour();
+            minute = gps.time.minute();
+            second = gps.time.second();
             Serial.print("  ");
             Serial.print(year);
             Serial.print("-");
@@ -92,12 +98,16 @@ void loop() {
             Serial.print(":");
             Serial.print(second);
             Serial.print(", ");
-            gps.f_get_position(&lat,&lon);
+            lat = gps.location.lat();
+            lon = gps.location.lng();
+
             Serial.print(lat, 6);
             Serial.print(", ");
             Serial.print(lon, 6);
-            Serial.print(", ");
-            Serial.print(fix_age);
+            if (nsat.isUpdated()) {
+                Serial.print(", ");
+                Serial.print(nsat.value());
+            }
             Serial.print("\n");
 
             servo1.write(3*second);
@@ -107,7 +117,6 @@ void loop() {
             digitalWrite(6, HIGH);
             delay(50);
             digitalWrite(6, LOW);
-
         }
     }
 }
