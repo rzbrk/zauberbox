@@ -18,7 +18,7 @@ TinyGPSPlus gps;
 // Because gps.satellites.value() from TinyGPS++ does not work as
 // expected we extract the number of satellites in view from the GPGSV
 // sentence manually
-TinyGPSCustom nsat(gps, "GPGSV", 3);
+TinyGPSCustom nmea_nsat(gps, "GPGSV", 3);
 
 // Define servo
 Servo servo1;
@@ -32,7 +32,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Define some variables for GPS data
 float lat, lon;
-int year;
+int year, nsat;
 byte month, day, hour, minute, second;
 
 void lcd_print_time(byte hour, byte minute, byte second) {
@@ -45,6 +45,14 @@ void lcd_print_time(byte hour, byte minute, byte second) {
     lcd.print(":");
     if (second < 10) { lcd.print("0"); }
     lcd.print(second);
+}
+
+void lcd_print_nsat(int nsat) {
+    lcd.setCursor(12, 0);
+    lcd.print("[");
+    if (nsat < 10) { lcd.print("0"); }
+    lcd.print(nsat);
+    lcd.print("]");
 }
 
 // Setup Routine
@@ -68,6 +76,8 @@ void setup() {
     lcd.backlight();
     //lcd.noBacklight();
     lcd.clear();
+    lcd_print_time(hour, minute, second);
+    lcd_print_nsat(nsat);
     Serial.print("  LCD [ok]\n");
 
     // Setup output pin for piezo
@@ -104,15 +114,20 @@ void loop() {
             Serial.print(lat, 6);
             Serial.print(", ");
             Serial.print(lon, 6);
-            if (nsat.isUpdated()) {
-                Serial.print(", ");
-                Serial.print(nsat.value());
+            if (nmea_nsat.isUpdated()) {
+                nsat = atol(nmea_nsat.value());
+            } else {
+                nsat = 0;
             }
+            Serial.print(", ");
+            Serial.print(nsat);
             Serial.print("\n");
 
             servo1.write(3*second);
 
+            // Update LCD
             lcd_print_time(hour, minute, second);
+            lcd_print_nsat(nsat);
 
             digitalWrite(6, HIGH);
             delay(50);
