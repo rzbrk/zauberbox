@@ -59,17 +59,17 @@ void lcd_print_nsat(int nsat) {
 void setup() {
     // Setup the serial port to computer
     Serial.begin(9600);
-    Serial.print("Starting . . .\n");
-    Serial.print("  UART to computer [ok]\n");
+    Serial.print("Starting . . .\r\n");
+    Serial.print("  UART to computer [ok]\r\n");
 
     // Setup the serial port to GPSr
     gpsSerial.begin(9600);
-    Serial.print("  UART to GPSr [ok]\n");
+    Serial.print("  UART to GPSr [ok]\r\n");
 
     // Setup the servo
     servo1.attach(9);
     servo1.write(90);
-    Serial.print("  Servo [ok]\n");
+    Serial.print("  Servo [ok]\r\n");
 
     // Setup LCD
     lcd.init();
@@ -78,7 +78,7 @@ void setup() {
     lcd.clear();
     lcd_print_time(hour, minute, second);
     lcd_print_nsat(nsat);
-    Serial.print("  LCD [ok]\n");
+    Serial.print("  LCD [ok]\r\n");
 
     // Setup output pin for piezo
     pinMode(6, OUTPUT);
@@ -121,7 +121,7 @@ void loop() {
             }
             Serial.print(", ");
             Serial.print(nsat);
-            Serial.print("\n");
+            Serial.print("\r\n");
 
             servo1.write(3*second);
 
