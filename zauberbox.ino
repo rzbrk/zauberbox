@@ -216,7 +216,7 @@ void cli_time(const char* arg) {
 
 void cli_date(const char* arg) { 
     Serial.print(F("  Current date: "));
-    if (year = 0) { Serial.print(F("000")); }
+    if (year == 0) { Serial.print(F("000")); }
     Serial.print(year);
     Serial.print(F("-"));
     if (month < 10) { Serial.print(F("0")); }
