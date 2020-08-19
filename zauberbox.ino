@@ -84,18 +84,18 @@ void setup() {
     Serial.begin(SERIAL_BAUDRATE);
     while (!Serial);
     delay(1000);
-    Serial.print("\r\n-=# Arduino Zauberbox #=-\r\n\r\n");
-    Serial.print("  Starting . . .\r\n");
-    Serial.print("  UART to computer [ok]\r\n");
+    Serial.print(F("\r\n-=# Arduino Zauberbox #=-\r\n\r\n"));
+    Serial.print(F("  Starting . . .\r\n"));
+    Serial.print(F("  UART to computer [ok]\r\n"));
 
     // Setup the serial port to GPSr
     gpsSerial.begin(GPS_BAUDRATE);
-    Serial.print("  UART to GPSr [ok]\r\n");
+    Serial.print(F("  UART to GPSr [ok]\r\n"));
 
     // Setup the servo
     servo1.attach(SERVO_PIN);
     servo1.write(SERVO_INIT_POS);
-    Serial.print("  Servo [ok]\r\n");
+    Serial.print(F("  Servo [ok]\r\n"));
 
     // Setup LCD
     lcd.init();
@@ -104,7 +104,7 @@ void setup() {
     lcd.clear();
     lcd_print_time(hour, minute, second);
     lcd_print_nsat(nsat);
-    Serial.print("  LCD [ok]\r\n");
+    Serial.print(F("  LCD [ok]\r\n"));
 
     // Setup CLI
     cmdline.begin(commands, sizeof(commands));
@@ -159,13 +159,13 @@ void (* reset_func) (void) = 0;
 void lcd_print_time(byte hour, byte minute, byte second) {
     // Print time in upper-left corner
     lcd.setCursor(0, 0);
-    if (hour < 10) { lcd.print("0"); }
+    if (hour < 10) { lcd.print(F("0")); }
     lcd.print(hour);
-    lcd.print(":");
-    if (minute < 10) { lcd.print("0"); }
+    lcd.print(F(":"));
+    if (minute < 10) { lcd.print(F("0")); }
     lcd.print(minute);
-    lcd.print(":");
-    if (second < 10) { lcd.print("0"); }
+    lcd.print(F(":"));
+    if (second < 10) { lcd.print(F("0")); }
     lcd.print(second);
 }
 
@@ -174,66 +174,67 @@ void lcd_print_time(byte hour, byte minute, byte second) {
 void lcd_print_nsat(int nsat) {
     // Print nsat to upper-right corner
     lcd.setCursor(12, 0);
-    lcd.print("[");
-    if (nsat < 10) { lcd.print("0"); }
+    lcd.print(F("["));
+    if (nsat < 10) { lcd.print(F("0")); }
     lcd.print(nsat);
-    lcd.print("]");
+    lcd.print(F("]"));
 }
 
 void cli_help(const char* arg) {
-    Serial.print("\r\n-=# Arduino Zauberbox #=-\r\n\r\n");
-    Serial.print("Available commands:\r\n");
-    Serial.print("  help            print this help message\r\n");
-    Serial.print("  time            print GPS time\r\n");
-    Serial.print("  date            print GPS date\r\n");
-    Serial.print("  servo_unlock    unlock box\r\n");
-    Serial.print("  servo_lock      lock box\r\n");
-    Serial.print("  servo_getpos    print current servo position\r\n");
-    Serial.print("  reset           perform software reset\r\n");
-    Serial.print("\r\n");
+    Serial.print(F("\r\n-=# Arduino Zauberbox #=-\r\n\r\n"));
+    Serial.print(F("Available commands:\r\n"));
+    Serial.print(F("  help            print this help message\r\n"));
+    Serial.print(F("  time            print GPS time\r\n"));
+    Serial.print(F("  date            print GPS date\r\n"));
+    Serial.print(F("  servo_unlock    unlock box\r\n"));
+    Serial.print(F("  servo_lock      lock box\r\n"));
+    Serial.print(F("  servo_getpos    print current servo position\r\n"));
+    Serial.print(F("  beep            produces beep\r\n"));
+    Serial.print(F("  reset           perform software reset\r\n"));
+    Serial.print(F("\r\n"));
 }
 
 void cli_time(const char* arg) { 
-    Serial.print("  Current time: ");
-    if (hour < 10) { Serial.print("0"); }
+    Serial.print(F("  Current time: "));
+    if (hour < 10) { Serial.print(F("0")); }
     Serial.print(hour);
-    Serial.print(":");
-    if (minute < 10) { Serial.print("0"); }
+    Serial.print(F(":"));
+    if (minute < 10) { Serial.print(F("0")); }
     Serial.print(minute);
-    Serial.print(":");
-    if (second < 10) { Serial.print("0"); }
+    Serial.print(F(":"));
+    if (second < 10) { Serial.print(F("0")); }
     Serial.print(second);
-    Serial.print("\r\n\r\n");
+    Serial.print(F("\r\n\r\n"));
 }
 
 void cli_date(const char* arg) { 
-    Serial.print("  Current date: ");
-    if (year = 0) { Serial.print("000"); }
+    Serial.print(F("  Current date: "));
+    if (year = 0) { Serial.print(F("000")); }
     Serial.print(year);
-    Serial.print("-");
-    if (month < 10) { Serial.print("0"); }
+    Serial.print(F("-"));
+    if (month < 10) { Serial.print(F("0")); }
     Serial.print(month);
-    Serial.print("-");
-    if (day < 10) { Serial.print("0"); }
+    Serial.print(F("-"));
+    if (day < 10) { Serial.print(F("0")); }
     Serial.print(day);
-    Serial.print("\r\n\r\n");
+    Serial.print(F("\r\n\r\n"));
 }
 void cli_servo_unlock(const char* arg) {
-    Serial.print("  Unlocking . . . ");
+    Serial.print(F("  Unlocking . . . "));
     servo1.write(SERVO_UNLOCK_POS);
-    Serial.print("[ok]\r\n\r\n");
+    Serial.print(F("[ok]\r\n\r\n"));
 }
 
 void cli_servo_lock(const char* arg) {
-    Serial.print("  Locking . . . ");
+    Serial.print(F("  Locking . . . "));
     servo1.write(SERVO_LOCK_POS);
-    Serial.print("[ok]\r\n\r\n");
+    Serial.print(F("[ok]\r\n\r\n"));
 }
 
 void cli_servo_getpos(const char* arg) {
-    Serial.print("  Servo position: ");
+    Serial.print(F("  Servo position: "));
     Serial.print(servo1.read());
-    Serial.print("\r\n\r\n");
+    Serial.print(F("\r\n\r\n"));
 }
 
 void cli_reset(const char* arg) {
