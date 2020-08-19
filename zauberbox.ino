@@ -62,6 +62,7 @@ void cli_position(const char* arg);
 void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
+void cli_wpts_show(const char* arg);
 void cli_beep (const char* arg);
 void cli_reset (const char* arg);
 
@@ -73,6 +74,7 @@ const cmd_t commands[] = {
     {"servo_unlock", cli_servo_unlock},
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
+    {"wpts_show", cli_wpts_show},
     {"beep", cli_beep},
     {"reset", cli_reset},
 };
@@ -81,6 +83,21 @@ const cmd_t commands[] = {
 double lat, lon;
 int year, nsat;
 byte month, day, hour, minute, second;
+
+/* Define a multidimensional array to store waypoints
+*   Column | Value
+*  ---------+---------------------------
+*        0 | latitude
+*        1 | longitude
+*        2 | active? (0: no, !=0: yes)
+*        3 | passed? (0: no, !=0: yes)
+*/
+#define WPTS_NUMBER 3
+double waypoint[WPTS_NUMBER][4] = {
+    {1.0, 1.0, 1.0, 1.0},
+    {2.0, 2.0, 1.0, 0.0},
+    {3.0, 3.0, 1.0, 0.0},
+};
 
 // Setup Routine
 void setup() {
@@ -260,6 +277,36 @@ void cli_servo_getpos(const char* arg) {
     Serial.print(F("  Servo position: "));
     Serial.print(servo1.read());
     Serial.print(F("\r\n\r\n"));
+}
+
+void cli_wpts_show(const char* arg) {
+    static char outstr[15];
+    Serial.print(F("  Waypoints:\r\n\r\n"));
+    Serial.print(F("   no | lat       | lon       | active? | passed?\r\n"));
+    Serial.print(F("  ----+-----------+-----------+---------+---------\r\n"));
+    for (int i = 0; i < WPTS_NUMBER; i++) {
+        Serial.print(F("   "));
+        if (i < 10) { Serial.print(F(" ")); }
+        Serial.print(i);
+        Serial.print(F(" |"));
+        for (int j = 0; j < 2; j++) {
+            dtostrf(waypoint[i][j], 10, 4, outstr);
+            Serial.print(outstr);
+            Serial.print(F(" |"));
+        }
+        if (waypoint[i][2] == 0) {
+            Serial.print(F("      no |"));
+        } else {
+            Serial.print(F("     yes |"));
+        }
+        if (waypoint[i][3] == 0) {
+            Serial.print(F("      no"));
+        } else {
+            Serial.print(F("     yes"));
+        }
+        Serial.print(F("\r\n"));
+    }
+    Serial.print(F("\r\n"));
 }
 
 void cli_beep(const char* arg) {
