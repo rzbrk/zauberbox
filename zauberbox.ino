@@ -183,8 +183,8 @@ void cli_help(const char* arg) {
     Serial.print("Available commands:\r\n");
     Serial.print("  help            print this help message\r\n");
     Serial.print("  time            print GPS time\r\n");
-    Serial.print("  unlock          unlock box\r\n");
-    Serial.print("  lock            lock box\r\n");
+    Serial.print("  servo_unlock    unlock box\r\n");
+    Serial.print("  servo_lock      lock box\r\n");
     Serial.print("  servo_getpos    print current servo position\r\n");
     Serial.print("  reset           perform software reset\r\n");
     Serial.print("\r\n");
