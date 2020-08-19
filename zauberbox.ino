@@ -57,6 +57,7 @@ CmdLine cmdline(Serial);
 // Define the Arduino CLI commands and associate them a function
 void cli_help(const char* arg);
 void cli_time(const char* arg);
+void cli_date(const char* arg);
 void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
@@ -65,6 +66,7 @@ void cli_reset (const char* arg);
 const cmd_t commands[] = {
     {"help", cli_help},
     {"time", cli_time},
+    {"date", cli_date},
     {"servo_unlock", cli_servo_unlock},
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
@@ -183,6 +185,7 @@ void cli_help(const char* arg) {
     Serial.print("Available commands:\r\n");
     Serial.print("  help            print this help message\r\n");
     Serial.print("  time            print GPS time\r\n");
+    Serial.print("  date            print GPS date\r\n");
     Serial.print("  servo_unlock    unlock box\r\n");
     Serial.print("  servo_lock      lock box\r\n");
     Serial.print("  servo_getpos    print current servo position\r\n");
@@ -191,7 +194,7 @@ void cli_help(const char* arg) {
 }
 
 void cli_time(const char* arg) { 
-    Serial.print("Time: ");
+    Serial.print("  Current time: ");
     if (hour < 10) { Serial.print("0"); }
     Serial.print(hour);
     Serial.print(":");
@@ -203,6 +206,18 @@ void cli_time(const char* arg) {
     Serial.print("\r\n\r\n");
 }
 
+void cli_date(const char* arg) { 
+    Serial.print("  Current date: ");
+    if (year = 0) { Serial.print("000"); }
+    Serial.print(year);
+    Serial.print("-");
+    if (month < 10) { Serial.print("0"); }
+    Serial.print(month);
+    Serial.print("-");
+    if (day < 10) { Serial.print("0"); }
+    Serial.print(day);
+    Serial.print("\r\n\r\n");
+}
 void cli_servo_unlock(const char* arg) {
     Serial.print("  Unlocking . . . ");
     servo1.write(SERVO_UNLOCK_POS);
