@@ -58,6 +58,7 @@ CmdLine cmdline(Serial);
 void cli_help(const char* arg);
 void cli_time(const char* arg);
 void cli_date(const char* arg);
+void cli_position(const char* arg);
 void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
@@ -68,6 +69,7 @@ const cmd_t commands[] = {
     {"help", cli_help},
     {"time", cli_time},
     {"date", cli_date},
+    {"position", cli_position},
     {"servo_unlock", cli_servo_unlock},
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
@@ -76,7 +78,7 @@ const cmd_t commands[] = {
 };
 
 // Define some variables for GPS data
-float lat, lon;
+double lat, lon;
 int year, nsat;
 byte month, day, hour, minute, second;
 
@@ -193,6 +195,7 @@ void cli_help(const char* arg) {
     Serial.print(F("  help            print this help message\r\n"));
     Serial.print(F("  time            print GPS time\r\n"));
     Serial.print(F("  date            print GPS date\r\n"));
+    Serial.print(F("  position        print GPS position (lat/lon)\r\n"));
     Serial.print(F("  servo_unlock    unlock box\r\n"));
     Serial.print(F("  servo_lock      lock box\r\n"));
     Serial.print(F("  servo_getpos    print current servo position\r\n"));
@@ -226,6 +229,17 @@ void cli_date(const char* arg) {
     Serial.print(day);
     Serial.print(F("\r\n\r\n"));
 }
+
+void cli_position(const char* arg) {
+    Serial.print(F("  Current position:\r\n"));
+    Serial.print(F("  Latitude:  "));
+    Serial.print(lat);
+    Serial.print(F("\r\n"));
+    Serial.print(F("  Longitude: "));
+    Serial.print(lon);
+    Serial.print(F("\r\n\r\n"));
+}
+
 void cli_servo_unlock(const char* arg) {
     Serial.print(F("  Unlocking . . . "));
     servo1.write(SERVO_UNLOCK_POS);
