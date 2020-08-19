@@ -31,8 +31,8 @@ TinyGPSCustom nmea_nsat(gps, "GPGSV", 3);
 // Servo attached to pin D9 of microcontroller
 #define SERVO_PIN 9
 #define SERVO_INIT_POS 90
-#define SERVO_OPEN_POS 0
-#define SERVO_CLOSE_POS 180
+#define SERVO_UNLOCK_POS 0
+#define SERVO_LOCK_POS 180
 Servo servo1;
 
 // Define piezo
@@ -57,16 +57,18 @@ CmdLine cmdline(Serial);
 // Define the Arduino CLI commands and associate them a function
 void cli_help(const char* arg);
 void cli_time(const char* arg);
-void cli_servo_open(const char* arg);
-void cli_servo_close(const char* arg);
+void cli_servo_unlock(const char* arg);
+void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
+void cli_reset (const char* arg);
 
 const cmd_t commands[] = {
     {"help", cli_help},
     {"time", cli_time},
-    {"open", cli_servo_open},
-    {"close", cli_servo_close},
+    {"unlock", cli_servo_unlock},
+    {"lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
+    {"reset", cli_reset},
 };
 
 // Define some variables for GPS data
@@ -79,7 +81,9 @@ void setup() {
     // Setup the serial port to computer
     Serial.begin(SERIAL_BAUDRATE);
     while (!Serial);
-    Serial.print("Starting . . .\r\n");
+    delay(1000);
+    Serial.print("\r\n-=# Arduino Zauberbox #=-\r\n\r\n");
+    Serial.print("  Starting . . .\r\n");
     Serial.print("  UART to computer [ok]\r\n");
 
     // Setup the serial port to GPSr
@@ -145,6 +149,9 @@ void loop() {
     }
 }
 
+// Define reset function. When called, go to address zero.
+void (* reset_func) (void) = 0;
+
 // Function to display/update time on LCD
 // HH:MM:SS
 void lcd_print_time(byte hour, byte minute, byte second) {
@@ -176,9 +183,10 @@ void cli_help(const char* arg) {
     Serial.print("Available commands:\r\n");
     Serial.print("  help            print this help message\r\n");
     Serial.print("  time            print GPS time\r\n");
-    Serial.print("  open            open box\r\n");
-    Serial.print("  close           close box\r\n");
+    Serial.print("  unlock          unlock box\r\n");
+    Serial.print("  lock            lock box\r\n");
     Serial.print("  servo_getpos    print current servo position\r\n");
+    Serial.print("  reset           perform software reset\r\n");
     Serial.print("\r\n");
 }
 
@@ -195,18 +203,24 @@ void cli_time(const char* arg) {
     Serial.print("\r\n\r\n");
 }
 
-void cli_servo_open(const char* arg) {
-    servo1.write(SERVO_OPEN_POS);
-    Serial.print("Opened box\r\n\r\n");
+void cli_servo_unlock(const char* arg) {
+    Serial.print("  Unlocking . . . ");
+    servo1.write(SERVO_UNLOCK_POS);
+    Serial.print("[ok]\r\n\r\n");
 }
 
-void cli_servo_close(const char* arg) {
-    servo1.write(SERVO_CLOSE_POS);
-    Serial.print("Closed box\r\n\r\n");
+void cli_servo_lock(const char* arg) {
+    Serial.print("  Locking . . . ");
+    servo1.write(SERVO_LOCK_POS);
+    Serial.print("[ok]\r\n\r\n");
 }
 
 void cli_servo_getpos(const char* arg) {
-    Serial.print("Servo position: ");
+    Serial.print("  Servo position: ");
     Serial.print(servo1.read());
     Serial.print("\r\n\r\n");
+}
+
+void cli_reset(const char* arg) {
+    reset_func();
 }
