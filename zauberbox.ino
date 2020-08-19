@@ -218,6 +218,7 @@ void cli_help(const char* arg) {
     Serial.print(F("  servo_unlock    unlock box\r\n"));
     Serial.print(F("  servo_lock      lock box\r\n"));
     Serial.print(F("  servo_getpos    print current servo position\r\n"));
+    Serial.print(F("  wpts_show       print list of waypoints\r\n"));
     Serial.print(F("  beep            produces beep\r\n"));
     Serial.print(F("  reset           perform software reset\r\n"));
     Serial.print(F("\r\n"));
