@@ -127,15 +127,13 @@ void setup() {
     lcd_print_nsat(nsat);
     Serial.print(F("  LCD [ok]\r\n"));
 
-    // Setup CLI
-    cmdline.begin(commands, sizeof(commands));
-    Serial.print(F("  CLI [ok]\r\n"));
-
     // Setup output pin for piezo
     pinMode(PIEZO_PIN, OUTPUT);
     Serial.print(F("  Piezo [ok]\r\n"));
-
     Serial.print(F("\r\n"));
+
+    // Setup CLI
+    cmdline.begin(commands, sizeof(commands));
 }
 
 // Main loop
