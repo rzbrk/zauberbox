@@ -160,8 +160,6 @@ void loop() {
                 nsat = 0;
             }
 
-            servo1.write(3*second);
-
             // Update LCD
             lcd_print_time(hour, minute, second);
             lcd_print_nsat(nsat);
@@ -251,12 +249,15 @@ void cli_date(const char* arg) {
 }
 
 void cli_position(const char* arg) {
+    static char outstr[15];
     Serial.print(F("  Current position:\r\n"));
     Serial.print(F("  Latitude:  "));
-    Serial.print(lat);
+    dtostrf(lat, 10, 4, outstr);
+    Serial.print(outstr);
     Serial.print(F("\r\n"));
     Serial.print(F("  Longitude: "));
-    Serial.print(lon);
+    dtostrf(lon, 10, 4, outstr);
+    Serial.print(outstr);
     Serial.print(F("\r\n\r\n"));
 }
 
