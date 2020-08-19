@@ -112,9 +112,13 @@ void setup() {
 
     // Setup CLI
     cmdline.begin(commands, sizeof(commands));
+    Serial.print(F("  CLI [ok]\r\n"));
 
     // Setup output pin for piezo
     pinMode(PIEZO_PIN, OUTPUT);
+    Serial.print(F("  Piezo [ok]\r\n"));
+
+    Serial.print(F("\r\n"));
 }
 
 // Main loop
