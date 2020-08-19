@@ -31,6 +31,8 @@ TinyGPSCustom nmea_nsat(gps, "GPGSV", 3);
 // Servo attached to pin D9 of microcontroller
 #define SERVO_PIN 9
 #define SERVO_INIT_POS 90
+#define SERVO_OPEN_POS 0
+#define SERVO_CLOSE_POS 180
 Servo servo1;
 
 // Define piezo
@@ -55,10 +57,16 @@ CmdLine cmdline(Serial);
 // Define the Arduino CLI commands and associate them a function
 void cli_help(const char* arg);
 void cli_time(const char* arg);
+void cli_servo_open(const char* arg);
+void cli_servo_close(const char* arg);
+void cli_servo_getpos(const char* arg);
 
 const cmd_t commands[] = {
     {"help", cli_help},
     {"time", cli_time},
+    {"open", cli_servo_open},
+    {"close", cli_servo_close},
+    {"servo_getpos", cli_servo_getpos},
 };
 
 // Define some variables for GPS data
@@ -164,10 +172,13 @@ void lcd_print_nsat(int nsat) {
 }
 
 void cli_help(const char* arg) {
-    Serial.print("-=# Arduino Zauberbox #=-\r\n");
+    Serial.print("\r\n-=# Arduino Zauberbox #=-\r\n\r\n");
     Serial.print("Available commands:\r\n");
-    Serial.print("  help        print this help message\r\n");
-    Serial.print("  time        print GPS time\r\n");
+    Serial.print("  help            print this help message\r\n");
+    Serial.print("  time            print GPS time\r\n");
+    Serial.print("  open            open box\r\n");
+    Serial.print("  close           close box\r\n");
+    Serial.print("  servo_getpos    print current servo position\r\n");
     Serial.print("\r\n");
 }
 
@@ -184,3 +195,18 @@ void cli_time(const char* arg) {
     Serial.print("\r\n\r\n");
 }
 
+void cli_servo_open(const char* arg) {
+    servo1.write(SERVO_OPEN_POS);
+    Serial.print("Opened box\r\n\r\n");
+}
+
+void cli_servo_close(const char* arg) {
+    servo1.write(SERVO_CLOSE_POS);
+    Serial.print("Closed box\r\n\r\n");
+}
+
+void cli_servo_getpos(const char* arg) {
+    Serial.print("Servo position: ");
+    Serial.print(servo1.read());
+    Serial.print("\r\n\r\n");
+}
