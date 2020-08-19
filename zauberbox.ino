@@ -61,6 +61,7 @@ void cli_date(const char* arg);
 void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
+void cli_beep (const char* arg);
 void cli_reset (const char* arg);
 
 const cmd_t commands[] = {
@@ -70,6 +71,7 @@ const cmd_t commands[] = {
     {"servo_unlock", cli_servo_unlock},
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
+    {"beep", cli_beep},
     {"reset", cli_reset},
 };
 
@@ -144,15 +146,20 @@ void loop() {
             lcd_print_nsat(nsat);
 
             // Let piezo produce beep
-            digitalWrite(PIEZO_PIN, HIGH);
-            delay(50);
-            digitalWrite(PIEZO_PIN, LOW);
+            beep(50);
         }
     }
 }
 
 // Define reset function. When called, go to address zero.
 void (* reset_func) (void) = 0;
+
+// Let the piezo beep for a given time
+void beep(long millisec) {
+    digitalWrite(PIEZO_PIN, HIGH);
+    delay(millisec);
+    digitalWrite(PIEZO_PIN, LOW);
+}
 
 // Function to display/update time on LCD
 // HH:MM:SS
@@ -235,6 +242,10 @@ void cli_servo_getpos(const char* arg) {
     Serial.print(F("  Servo position: "));
     Serial.print(servo1.read());
     Serial.print(F("\r\n\r\n"));
+}
+
+void cli_beep(const char* arg) {
+    beep(50);
 }
 
 void cli_reset(const char* arg) {
