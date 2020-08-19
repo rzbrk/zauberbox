@@ -65,8 +65,8 @@ void cli_reset (const char* arg);
 const cmd_t commands[] = {
     {"help", cli_help},
     {"time", cli_time},
-    {"unlock", cli_servo_unlock},
-    {"lock", cli_servo_lock},
+    {"servo_unlock", cli_servo_unlock},
+    {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
     {"reset", cli_reset},
 };
