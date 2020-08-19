@@ -3,6 +3,7 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <CmdLine.h>
 
 // Speed of serial port
 #define SERIAL_BAUDRATE 9600
@@ -46,10 +47,95 @@ Servo servo1;
 #define LCD_ROWS 2
 LiquidCrystal_I2C lcd(LCD_I2C_ADDR, LCD_COLS, LCD_ROWS);
 
+// Create the command line interface (CLI)and use the Serial port
+// to introduce commands
+// See: http://blog.industrialshields.com/en/command-line-arduino-library/
+CmdLine cmdline(Serial);
+
+// Define the Arduino CLI commands and associate them a function
+void cli_help(const char* arg);
+void cli_time(const char* arg);
+
+const cmd_t commands[] = {
+    {"help", cli_help},
+    {"time", cli_time},
+};
+
 // Define some variables for GPS data
 float lat, lon;
 int year, nsat;
 byte month, day, hour, minute, second;
+
+// Setup Routine
+void setup() {
+    // Setup the serial port to computer
+    Serial.begin(SERIAL_BAUDRATE);
+    while (!Serial);
+    Serial.print("Starting . . .\r\n");
+    Serial.print("  UART to computer [ok]\r\n");
+
+    // Setup the serial port to GPSr
+    gpsSerial.begin(GPS_BAUDRATE);
+    Serial.print("  UART to GPSr [ok]\r\n");
+
+    // Setup the servo
+    servo1.attach(SERVO_PIN);
+    servo1.write(SERVO_INIT_POS);
+    Serial.print("  Servo [ok]\r\n");
+
+    // Setup LCD
+    lcd.init();
+    lcd.backlight();
+    //lcd.noBacklight();
+    lcd.clear();
+    lcd_print_time(hour, minute, second);
+    lcd_print_nsat(nsat);
+    Serial.print("  LCD [ok]\r\n");
+
+    // Setup CLI
+    cmdline.begin(commands, sizeof(commands));
+
+    // Setup output pin for piezo
+    pinMode(PIEZO_PIN, OUTPUT);
+}
+
+// Main loop
+void loop() {
+    while(gpsSerial.available() > 0) { 
+        // Update cmdline often to process commands written in the Serial port
+        cmdline.update();
+        
+        gps.encode(gpsSerial.read());
+        if (gps.location.isUpdated()) {
+            year = gps.date.year();
+            month = gps.date.month();
+            day = gps.date.day();
+            hour = gps.time.hour();
+            minute = gps.time.minute();
+            second = gps.time.second();
+
+            lat = gps.location.lat();
+            lon = gps.location.lng();
+
+            if (nmea_nsat.isUpdated()) {
+                nsat = atol(nmea_nsat.value());
+            } else {
+                nsat = 0;
+            }
+
+            servo1.write(3*second);
+
+            // Update LCD
+            lcd_print_time(hour, minute, second);
+            lcd_print_nsat(nsat);
+
+            // Let piezo produce beep
+            digitalWrite(PIEZO_PIN, HIGH);
+            delay(50);
+            digitalWrite(PIEZO_PIN, LOW);
+        }
+    }
+}
 
 // Function to display/update time on LCD
 // HH:MM:SS
@@ -77,83 +163,24 @@ void lcd_print_nsat(int nsat) {
     lcd.print("]");
 }
 
-// Setup Routine
-void setup() {
-    // Setup the serial port to computer
-    Serial.begin(SERIAL_BAUDRATE);
-    Serial.print("Starting . . .\r\n");
-    Serial.print("  UART to computer [ok]\r\n");
-
-    // Setup the serial port to GPSr
-    gpsSerial.begin(GPS_BAUDRATE);
-    Serial.print("  UART to GPSr [ok]\r\n");
-
-    // Setup the servo
-    servo1.attach(SERVO_PIN);
-    servo1.write(SERVO_INIT_POS);
-    Serial.print("  Servo [ok]\r\n");
-
-    // Setup LCD
-    lcd.init();
-    lcd.backlight();
-    //lcd.noBacklight();
-    lcd.clear();
-    lcd_print_time(hour, minute, second);
-    lcd_print_nsat(nsat);
-    Serial.print("  LCD [ok]\r\n");
-
-    // Setup output pin for piezo
-    pinMode(PIEZO_PIN, OUTPUT);
+void cli_help(const char* arg) {
+    Serial.print("-=# Arduino Zauberbox #=-\r\n");
+    Serial.print("Available commands:\r\n");
+    Serial.print("  help        print this help message\r\n");
+    Serial.print("  time        print GPS time\r\n");
+    Serial.print("\r\n");
 }
 
-// Main loop
-void loop() {
-    while(gpsSerial.available() > 0) { 
-        gps.encode(gpsSerial.read());
-        if (gps.location.isUpdated()) {
-            year = gps.date.year();
-            month = gps.date.month();
-            day = gps.date.day();
-            hour = gps.time.hour();
-            minute = gps.time.minute();
-            second = gps.time.second();
-            Serial.print("  ");
-            Serial.print(year);
-            Serial.print("-");
-            Serial.print(month);
-            Serial.print("-");
-            Serial.print(day);
-            Serial.print(", ");
-            Serial.print(hour);
-            Serial.print(":");
-            Serial.print(minute);
-            Serial.print(":");
-            Serial.print(second);
-            Serial.print(", ");
-            lat = gps.location.lat();
-            lon = gps.location.lng();
-
-            Serial.print(lat, 6);
-            Serial.print(", ");
-            Serial.print(lon, 6);
-            if (nmea_nsat.isUpdated()) {
-                nsat = atol(nmea_nsat.value());
-            } else {
-                nsat = 0;
-            }
-            Serial.print(", ");
-            Serial.print(nsat);
-            Serial.print("\r\n");
-
-            servo1.write(3*second);
-
-            // Update LCD
-            lcd_print_time(hour, minute, second);
-            lcd_print_nsat(nsat);
-
-            digitalWrite(6, HIGH);
-            delay(50);
-            digitalWrite(6, LOW);
-        }
-    }
+void cli_time(const char* arg) { 
+    Serial.print("Time: ");
+    if (hour < 10) { Serial.print("0"); }
+    Serial.print(hour);
+    Serial.print(":");
+    if (minute < 10) { Serial.print("0"); }
+    Serial.print(minute);
+    Serial.print(":");
+    if (second < 10) { Serial.print("0"); }
+    Serial.print(second);
+    Serial.print("\r\n\r\n");
 }
+
