@@ -59,6 +59,8 @@ void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
 void cli_wpts_show(const char* arg);
+void cli_wpts_next(const char* arg);
+void cli_wpts_prev(const char* arg);
 void cli_beep (const char* arg);
 void cli_reset (const char* arg);
 
@@ -71,6 +73,8 @@ const cmd_t commands[] = {
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
     {"wpts_show", cli_wpts_show},
+    {"wpts_next", cli_wpts_next},
+    {"wpts_prev", cli_wpts_prev},
     {"beep", cli_beep},
     {"reset", cli_reset},
 };
@@ -138,8 +142,11 @@ void setup() {
     pinMode(PIEZO_PIN, OUTPUT);
     Serial.print(F("  Piezo [ok]\r\n"));
 
-    // Initialize number of active waypoint from EEPROM
-    wpt = EEPROM.read(EE_ADDR) % (WPTS_NUMBER - 1);
+    // After reboot, initialize number of current waypoint from EEPROM
+    wpt = EEPROM.read(EE_ADDR);
+    //if (wpt >= WPTS_NUMBER) {
+    //    wpt = WPTS_NUMBER - 1;
+    //}
     Serial.print(F("  Initialized active waypoint from EEPROM [ok]\r\n"));
     Serial.print(F("\r\n"));
 
@@ -245,6 +252,8 @@ void cli_help(const char* arg) {
     Serial.print(F("  servo_lock      lock box\r\n"));
     Serial.print(F("  servo_getpos    print current servo position\r\n"));
     Serial.print(F("  wpts_show       print list of waypoints\r\n"));
+    Serial.print(F("  wpts_next       skip to next waypoints\r\n"));
+    Serial.print(F("  wpts_prev       skip to prev waypoints\r\n"));
     Serial.print(F("  beep            produces beep\r\n"));
     Serial.print(F("  reset           perform software reset\r\n"));
     Serial.print(F("\r\n"));
@@ -330,6 +339,24 @@ void cli_wpts_show(const char* arg) {
         Serial.print(F("\r\n"));
     }
     Serial.print(F("\r\n"));
+}
+
+void cli_wpts_next(const char* arg) {
+    Serial.print(F("  Skip to next waypoint "));
+    if (wpt < WPTS_NUMBER) {
+        wpt = wpt + 1;
+    }
+    EEPROM.write(EE_ADDR, wpt);
+    Serial.print(F("[ok]\r\n\r\n"));
+}
+
+void cli_wpts_prev(const char* arg) {
+    Serial.print(F("  Skip to prev waypoint "));
+    if (wpt > 0) {
+        wpt = wpt - 1;
+    }
+    EEPROM.write(EE_ADDR, wpt);
+    Serial.print(F("[ok]\r\n\r\n"));
 }
 
 void cli_beep(const char* arg) {
