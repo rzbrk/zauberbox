@@ -92,7 +92,7 @@ int year, nsat;
 // hour         hour, 0...23
 // minute       minute, 0...59
 // second       second, 0...59
-// wpt          no of active waypoint (row in array waypoint),
+// wpt          index of active waypoint (row in array waypoint),
 //              range: 0...WPTS_NUMBER. If wpt = WPTS_NUMBER all
 //              waypoints are passed
 byte month, day, hour, minute, second, wpt;
@@ -104,6 +104,7 @@ byte month, day, hour, minute, second, wpt;
 *        1 | longitude
 */
 #define WPTS_NUMBER 3
+// Define the address in EEPROM to store the index of current waypoint
 #define EE_ADDR 0
 double waypoint[WPTS_NUMBER][2] = {
     {48.85826, 2.294516}, // Paris Eiffel Tower
@@ -239,6 +240,7 @@ void lcd_print_nsat(int nsat) {
     lcd.print(F("]"));
 }
 
+// Function to display/update the distance to the next waypoint on LCD
 void lcd_print_distance(double dist) {
     String unit = "m";
     
