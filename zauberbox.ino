@@ -93,7 +93,8 @@ int year, nsat;
 // minute       minute, 0...59
 // second       second, 0...59
 // wpt          no of active waypoint (row in array waypoint),
-//              range: 0...WPTS_NUMBER - 1
+//              range: 0...WPTS_NUMBER. If wpt = WPTS_NUMBER all
+//              waypoints are passed
 byte month, day, hour, minute, second, wpt;
 
 /* Define a multidimensional array to store waypoints
@@ -104,7 +105,7 @@ byte month, day, hour, minute, second, wpt;
 */
 #define WPTS_NUMBER 3
 #define EE_ADDR 0
-double waypoint[WPTS_NUMBER][4] = {
+double waypoint[WPTS_NUMBER][2] = {
     {48.85826, 2.294516}, // Paris Eiffel Tower
     {50.638983, 7.235957}, // Selhof Kapelle
     {3.0, 3.0},
@@ -124,7 +125,7 @@ void setup() {
     gpsSerial.begin(GPS_BAUDRATE);
     Serial.print(F("  UART to GPSr [ok]\r\n"));
 
-    // Setup the servo
+    // Setup the servo. Set the servo to SERVO_INIT_POS (usually locked)
     servo1.attach(SERVO_PIN);
     servo1.write(SERVO_INIT_POS);
     Serial.print(F("  Servo [ok]\r\n"));
@@ -144,9 +145,9 @@ void setup() {
 
     // After reboot, initialize number of current waypoint from EEPROM
     wpt = EEPROM.read(EE_ADDR);
-    //if (wpt >= WPTS_NUMBER) {
-    //    wpt = WPTS_NUMBER - 1;
-    //}
+    if (wpt > WPTS_NUMBER) {
+        wpt = WPTS_NUMBER;
+    }
     Serial.print(F("  Initialized active waypoint from EEPROM [ok]\r\n"));
     Serial.print(F("\r\n"));
 
@@ -174,11 +175,21 @@ void loop() {
 
             nsat = gps.satellites.value();
 
-            dist = TinyGPSPlus::distanceBetween(
-                lat,
-                lon,
-                waypoint[wpt][0],
-                waypoint[wpt][1]);
+            // Calculate the distance between the current GPS position and
+            // the current waypoint in meters.
+            // If wpt = WPTS_NUMBER, that last waypoint in the list (array
+            // waypoint) are passed. In this case, set dist to zero and
+            // unlock the box.
+            if (wpt < WPTS_NUMBER) {
+                dist = TinyGPSPlus::distanceBetween(
+                    lat,
+                    lon,
+                    waypoint[wpt][0],
+                    waypoint[wpt][1]);
+            } else {
+                dist = 0.0;
+                servo1.write(SERVO_UNLOCK_POS);
+            }
 
             // Update LCD
             lcd.clear();
