@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <CmdLine.h>
+#include <EEPROM.h>
 
 // Speed of serial port
 #define SERIAL_BAUDRATE 9600
@@ -75,9 +76,21 @@ const cmd_t commands[] = {
 };
 
 // Define some variables for GPS data
+// lat          current latitude from GPS [degrees]
+// lon          current longitude from GPS [degrees]
+// dist         distance to active waypoint [meters]
 double lat, lon, dist;
+// year         year, e.g. 2020
+// nsat         GPS satellites in view [1]
 int year, nsat;
-byte month, day, hour, minute, second;
+// month        month, 1...12
+// day          day, 1...31
+// hour         hour, 0...23
+// minute       minute, 0...59
+// second       second, 0...59
+// wpt          no of active waypoint (row in array waypoint),
+//              range: 0...WPTS_NUMBER - 1
+byte month, day, hour, minute, second, wpt;
 
 /* Define a multidimensional array to store waypoints
 *   Column | Value
@@ -88,6 +101,7 @@ byte month, day, hour, minute, second;
 *        3 | passed? (0: no, !=0: yes)
 */
 #define WPTS_NUMBER 3
+#define EE_ADDR 0
 double waypoint[WPTS_NUMBER][4] = {
     {48.85826, 2.294516, 1.0, 1.0}, // Paris Eiffel Tower
     {50.638983, 7.235957, 1.0, 0.0}, // Selhof Kapelle
@@ -127,6 +141,10 @@ void setup() {
     Serial.print(F("  Piezo [ok]\r\n"));
     Serial.print(F("\r\n"));
 
+    // Initialize number of active waypoint from EEPROM
+    wpt = EEPROM.read(EE_ADDR) % (WPTS_NUMBER - 1)
+    Serial.print(F("  Initialized active waypoint from EEPROM [ok]\r\n"));
+
     // Setup CLI
     cmdline.begin(commands, sizeof(commands));
 }
@@ -154,8 +172,8 @@ void loop() {
             dist = TinyGPSPlus::distanceBetween(
                 lat,
                 lon,
-                waypoint[1][0],
-                waypoint[1][1]);
+                waypoint[wpt][0],
+                waypoint[wpt][1]);
 
             // Update LCD
             lcd.clear();
