@@ -22,11 +22,6 @@
 NeoSWSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
 TinyGPSPlus gps;
 
-// Because gps.satellites.value() from TinyGPS++ does not work as
-// expected we extract the number of satellites in view from the GPGSV
-// sentence manually
-TinyGPSCustom nmea_nsat(gps, "GPGSV", 3);
-
 // Define servo
 // Servo attached to pin D9 of microcontroller
 #define SERVO_PIN 9
@@ -154,11 +149,7 @@ void loop() {
             lat = gps.location.lat();
             lon = gps.location.lng();
 
-            if (nmea_nsat.isUpdated()) {
-                nsat = atol(nmea_nsat.value());
-            } else {
-                nsat = 0;
-            }
+            nsat = gps.satellites.value();
 
             // Update LCD
             lcd_print_time(hour, minute, second);
