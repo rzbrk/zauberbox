@@ -75,7 +75,7 @@ const cmd_t commands[] = {
 };
 
 // Define some variables for GPS data
-double lat, lon;
+double lat, lon, dist;
 int year, nsat;
 byte month, day, hour, minute, second;
 
@@ -89,8 +89,8 @@ byte month, day, hour, minute, second;
 */
 #define WPTS_NUMBER 3
 double waypoint[WPTS_NUMBER][4] = {
-    {1.0, 1.0, 1.0, 1.0},
-    {2.0, 2.0, 1.0, 0.0},
+    {48.85826, 2.294516, 1.0, 1.0}, // Paris Eiffel Tower
+    {50.638983, 7.235957, 1.0, 0.0}, // Selhof Kapelle
     {3.0, 3.0, 1.0, 0.0},
 };
 
@@ -151,9 +151,17 @@ void loop() {
 
             nsat = gps.satellites.value();
 
+            dist = TinyGPSPlus::distanceBetween(
+                lat,
+                lon,
+                waypoint[1][0],
+                waypoint[1][1]);
+
             // Update LCD
+            lcd.clear();
             lcd_print_time(hour, minute, second);
             lcd_print_nsat(nsat);
+            lcd_print_distance(dist);
 
             // Let piezo produce beep
             //beep(50);
@@ -195,6 +203,19 @@ void lcd_print_nsat(int nsat) {
     if (nsat < 10) { lcd.print(F("0")); }
     lcd.print(nsat);
     lcd.print(F("]"));
+}
+
+void lcd_print_distance(double dist) {
+    String unit = "m";
+    
+    if (dist > 1000) {
+        dist = dist / 1000.0;
+        unit = "km";
+    }
+    lcd.setCursor(0,1);
+    lcd.print(dist);
+    lcd.print(F(" "));
+    lcd.print(unit);
 }
 
 void cli_help(const char* arg) {
