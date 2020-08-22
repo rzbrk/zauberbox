@@ -106,6 +106,10 @@ byte month, day, hour, minute, second, wpt;
 #define WPTS_NUMBER 3
 // Define the address in EEPROM to store the index of current waypoint
 #define EE_ADDR 0
+// Define the distance treshold (meters). If the distance drops below this
+// treshold the current waypoint is passed and the program skips to the next
+// waypoint.
+#define DIST_TRESHOLD 15.0
 double waypoint[WPTS_NUMBER][2] = {
     {48.85826, 2.294516}, // Paris Eiffel Tower
     {50.638983, 7.235957}, // Selhof Kapelle
@@ -164,6 +168,8 @@ void loop() {
         
         gps.encode(gpsSerial.read());
         if (gps.location.isUpdated()) {
+            
+            // Update values from GPS
             year = gps.date.year();
             month = gps.date.month();
             day = gps.date.day();
@@ -176,6 +182,11 @@ void loop() {
 
             nsat = gps.satellites.value();
 
+            // Update LCD
+            lcd.clear();
+            lcd_print_time(hour, minute, second);
+            lcd_print_nsat(nsat);
+
             // Calculate the distance between the current GPS position and
             // the current waypoint in meters.
             // If wpt = WPTS_NUMBER, that last waypoint in the list (array
@@ -187,19 +198,18 @@ void loop() {
                     lon,
                     waypoint[wpt][0],
                     waypoint[wpt][1]);
+                lcd_print_distance(dist);
+                // If distance drops below threshold the waypoint is passed.
+                // Then, call function wpt_passed()
+                if (dist < DIST_TRESHOLD) {
+                    wpt_passed();
+                }
             } else {
                 dist = 0.0;
                 servo1.write(SERVO_UNLOCK_POS);
+                lcd.setCursor(0, 1);
+                lcd.print(F("Box is open!"));
             }
-
-            // Update LCD
-            lcd.clear();
-            lcd_print_time(hour, minute, second);
-            lcd_print_nsat(nsat);
-            lcd_print_distance(dist);
-
-            // Let piezo produce beep
-            //beep(50);
         }
     }
 }
@@ -213,6 +223,23 @@ void beep(long millisec) {
     delay(millisec);
     digitalWrite(PIEZO_PIN, LOW);
 }
+
+void wpt_passed() {
+    // First increase variable wpt to skip to the next waypoint
+    wpt = wpt + 1;
+    // Save wpt to EEPROM
+    EEPROM.write(EE_ADDR, wpt);
+    // Print notice to LCD and beep
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(F("CONGRATULATIONS!"));
+    lcd.setCursor(0, 1);
+    lcd.print(F(" :D :D :D :D :D "));
+    beep(1000);
+    delay(4000);
+}
+
+
 
 // Function to display/update time on LCD
 // HH:MM:SS
