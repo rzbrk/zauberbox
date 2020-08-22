@@ -1,0 +1,20 @@
+#!/usr/bin/kermit +
+
+# First argument must be present and specifying the port to use
+if not defined \%1 {
+    echo "First argument has to be port (e.g. /dev/ttyUSB0)"
+    exit
+}
+
+set line \%1
+set speed 9600
+set carrier-watch off
+set flow-control none
+
+# The second argument is the file name for the session logs
+if defined \%2 {
+    log session \%2
+}
+
+connect
+
