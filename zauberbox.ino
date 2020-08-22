@@ -26,7 +26,7 @@ TinyGPSPlus gps;
 // Define servo
 // Servo attached to pin D9 of microcontroller
 #define SERVO_PIN 9
-#define SERVO_INIT_POS 90
+#define SERVO_INIT_POS 0
 #define SERVO_UNLOCK_POS 0
 #define SERVO_LOCK_POS 180
 Servo servo1;
@@ -59,6 +59,7 @@ void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
 void cli_wpts_show(const char* arg);
+void cli_wpts_dist(const char* arg);
 void cli_wpts_next(const char* arg);
 void cli_wpts_prev(const char* arg);
 void cli_beep (const char* arg);
@@ -73,6 +74,7 @@ const cmd_t commands[] = {
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
     {"wpts_show", cli_wpts_show},
+    {"wpts_dist", cli_wpts_dist},
     {"wpts_next", cli_wpts_next},
     {"wpts_prev", cli_wpts_prev},
     {"beep", cli_beep},
@@ -269,15 +271,14 @@ void lcd_print_nsat(int nsat) {
 
 // Function to display/update the distance to the next waypoint on LCD
 void lcd_print_distance(double dist) {
-    String unit = "m";
+    String unit = " m";
     
     if (dist > 1000) {
         dist = dist / 1000.0;
-        unit = "km";
+        unit = " km";
     }
     lcd.setCursor(0,1);
     lcd.print(dist);
-    lcd.print(F(" "));
     lcd.print(unit);
 }
 
@@ -292,6 +293,7 @@ void cli_help(const char* arg) {
     Serial.print(F("  servo_lock      lock box\r\n"));
     Serial.print(F("  servo_getpos    print current servo position\r\n"));
     Serial.print(F("  wpts_show       print list of waypoints\r\n"));
+    Serial.print(F("  wpts_dist       print distance to next waypoint\r\n"));
     Serial.print(F("  wpts_next       skip to next waypoints\r\n"));
     Serial.print(F("  wpts_prev       skip to prev waypoints\r\n"));
     Serial.print(F("  beep            produces beep\r\n"));
@@ -379,6 +381,18 @@ void cli_wpts_show(const char* arg) {
         Serial.print(F("\r\n"));
     }
     Serial.print(F("\r\n"));
+}
+
+void cli_wpts_dist(const char* arg) {
+    Serial.print(F("  Distance to current waypoint: "));
+    String unit = " m";
+    if (dist > 1000) {
+        dist = dist / 1000.0;
+        unit = " km";
+    }
+    Serial.print(dist);
+    Serial.print(unit);
+    Serial.print(F("\r\n\r\n"));
 }
 
 void cli_wpts_next(const char* arg) {
