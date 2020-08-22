@@ -97,15 +97,13 @@ byte month, day, hour, minute, second, wpt;
 *  ---------+---------------------------
 *        0 | latitude
 *        1 | longitude
-*        2 | active? (0: no, !=0: yes)
-*        3 | passed? (0: no, !=0: yes)
 */
 #define WPTS_NUMBER 3
 #define EE_ADDR 0
 double waypoint[WPTS_NUMBER][4] = {
-    {48.85826, 2.294516, 1.0, 1.0}, // Paris Eiffel Tower
-    {50.638983, 7.235957, 1.0, 0.0}, // Selhof Kapelle
-    {3.0, 3.0, 1.0, 0.0},
+    {48.85826, 2.294516}, // Paris Eiffel Tower
+    {50.638983, 7.235957}, // Selhof Kapelle
+    {3.0, 3.0},
 };
 
 // Setup Routine
@@ -139,11 +137,11 @@ void setup() {
     // Setup output pin for piezo
     pinMode(PIEZO_PIN, OUTPUT);
     Serial.print(F("  Piezo [ok]\r\n"));
-    Serial.print(F("\r\n"));
 
     // Initialize number of active waypoint from EEPROM
-    wpt = EEPROM.read(EE_ADDR) % (WPTS_NUMBER - 1)
+    wpt = EEPROM.read(EE_ADDR) % (WPTS_NUMBER - 1);
     Serial.print(F("  Initialized active waypoint from EEPROM [ok]\r\n"));
+    Serial.print(F("\r\n"));
 
     // Setup CLI
     cmdline.begin(commands, sizeof(commands));
@@ -312,24 +310,19 @@ void cli_servo_getpos(const char* arg) {
 void cli_wpts_show(const char* arg) {
     static char outstr[15];
     Serial.print(F("  Waypoints:\r\n\r\n"));
-    Serial.print(F("   no | lat       | lon       | active? | passed?\r\n"));
-    Serial.print(F("  ----+-----------+-----------+---------+---------\r\n"));
+    Serial.print(F("   no | lat          | lon          | passed?\r\n"));
+    Serial.print(F("  ----+--------------+--------------+---------\r\n"));
     for (int i = 0; i < WPTS_NUMBER; i++) {
         Serial.print(F("   "));
         if (i < 10) { Serial.print(F(" ")); }
         Serial.print(i);
         Serial.print(F(" |"));
         for (int j = 0; j < 2; j++) {
-            dtostrf(waypoint[i][j], 10, 4, outstr);
+            dtostrf(waypoint[i][j], 13, 6, outstr);
             Serial.print(outstr);
             Serial.print(F(" |"));
         }
-        if (waypoint[i][2] == 0) {
-            Serial.print(F("      no |"));
-        } else {
-            Serial.print(F("     yes |"));
-        }
-        if (waypoint[i][3] == 0) {
+        if (i >= wpt) {
             Serial.print(F("      no"));
         } else {
             Serial.print(F("     yes"));
