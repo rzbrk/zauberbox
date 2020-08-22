@@ -165,7 +165,7 @@ void loop() {
             lcd_print_nsat(nsat);
 
             // Let piezo produce beep
-            beep(50);
+            //beep(50);
         }
     }
 }
