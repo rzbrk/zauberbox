@@ -111,11 +111,11 @@ byte month, day, hour, minute, second, wpt;
 // Define the distance treshold (meters). If the distance drops below this
 // treshold the current waypoint is passed and the program skips to the next
 // waypoint.
-#define DIST_TRESHOLD 15.0
+#define DIST_TRESHOLD 30.0
 double waypoint[WPTS_NUMBER][2] = {
-    {48.85826, 2.294516}, // Paris Eiffel Tower
     {50.638983, 7.235957}, // Selhof Kapelle
-    {3.0, 3.0},
+    {50.637700, 7.230329}, // Parkplatz Altglascontainer
+    {50.639470, 7.220051}, // Parkplatz Bahnhof
 };
 
 // Setup Routine
