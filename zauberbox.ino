@@ -26,9 +26,9 @@ TinyGPSPlus gps;
 // Define servo
 // Servo attached to pin D9 of microcontroller
 #define SERVO_PIN 9
-#define SERVO_INIT_POS 0
-#define SERVO_UNLOCK_POS 0
-#define SERVO_LOCK_POS 180
+#define SERVO_INIT_POS 145
+#define SERVO_UNLOCK_POS 80
+#define SERVO_LOCK_POS 145
 Servo servo1;
 
 // Define piezo
@@ -58,6 +58,7 @@ void cli_position(const char* arg);
 void cli_servo_unlock(const char* arg);
 void cli_servo_lock(const char* arg);
 void cli_servo_getpos(const char* arg);
+void cli_servo_setpos(const char* arg);
 void cli_wpts_show(const char* arg);
 void cli_wpts_dist(const char* arg);
 void cli_wpts_next(const char* arg);
@@ -73,6 +74,7 @@ const cmd_t commands[] = {
     {"servo_unlock", cli_servo_unlock},
     {"servo_lock", cli_servo_lock},
     {"servo_getpos", cli_servo_getpos},
+    {"servo_setpos", cli_servo_setpos},
     {"wpts_show", cli_wpts_show},
     {"wpts_dist", cli_wpts_dist},
     {"wpts_next", cli_wpts_next},
@@ -285,19 +287,21 @@ void lcd_print_distance(double dist) {
 void cli_help(const char* arg) {
     Serial.print(F("\r\n-=# Arduino Zauberbox #=-\r\n\r\n"));
     Serial.print(F("Available commands:\r\n"));
-    Serial.print(F("  help            print this help message\r\n"));
-    Serial.print(F("  time            print GPS time\r\n"));
-    Serial.print(F("  date            print GPS date\r\n"));
-    Serial.print(F("  position        print GPS position (lat/lon)\r\n"));
-    Serial.print(F("  servo_unlock    unlock box\r\n"));
-    Serial.print(F("  servo_lock      lock box\r\n"));
-    Serial.print(F("  servo_getpos    print current servo position\r\n"));
-    Serial.print(F("  wpts_show       print list of waypoints\r\n"));
-    Serial.print(F("  wpts_dist       print distance to next waypoint\r\n"));
-    Serial.print(F("  wpts_next       skip to next waypoints\r\n"));
-    Serial.print(F("  wpts_prev       skip to prev waypoints\r\n"));
-    Serial.print(F("  beep            produces beep\r\n"));
-    Serial.print(F("  reset           perform software reset\r\n"));
+    Serial.print(F("  help              print this help message\r\n"));
+    Serial.print(F("  time              print GPS time\r\n"));
+    Serial.print(F("  date              print GPS date\r\n"));
+    Serial.print(F("  position          print GPS position (lat/lon)\r\n"));
+    Serial.print(F("  servo_unlock      unlock box\r\n"));
+    Serial.print(F("  servo_lock        lock box\r\n"));
+    Serial.print(F("  servo_getpos      print current servo position\r\n"));
+    Serial.print(F("  servo_setpos pos  set servo position\r\n"));
+    Serial.print(F("                    to position pos\r\n"));
+    Serial.print(F("  wpts_show         print list of waypoints\r\n"));
+    Serial.print(F("  wpts_dist         print distance to next waypoint\r\n"));
+    Serial.print(F("  wpts_next         skip to next waypoints\r\n"));
+    Serial.print(F("  wpts_prev         skip to prev waypoints\r\n"));
+    Serial.print(F("  beep              produces beep\r\n"));
+    Serial.print(F("  reset             perform software reset\r\n"));
     Serial.print(F("\r\n"));
 }
 
@@ -355,6 +359,18 @@ void cli_servo_lock(const char* arg) {
 void cli_servo_getpos(const char* arg) {
     Serial.print(F("  Servo position: "));
     Serial.print(servo1.read());
+    Serial.print(F("\r\n\r\n"));
+}
+
+void cli_servo_setpos(const char* arg) {
+    Serial.print(F("  Set servo position to: "));
+    long servo_pos = String(arg).toInt();
+    long servo_min = min(SERVO_LOCK_POS, SERVO_UNLOCK_POS);
+    long servo_max = max(SERVO_LOCK_POS, SERVO_UNLOCK_POS);
+    if (servo_pos < servo_min) { servo_pos = servo_min; }
+    if (servo_pos > servo_max) { servo_pos = servo_max; }
+    servo1.write(servo_pos);
+    Serial.print(servo_pos);
     Serial.print(F("\r\n\r\n"));
 }
 
